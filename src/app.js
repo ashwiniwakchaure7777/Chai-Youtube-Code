@@ -12,4 +12,9 @@ app.use(express.json({limit:"20kb"}));  //to handle json data
 app.use(express.urlencoded({extended:true}));   //to handle data coming from url , api headers %
 app.use(cookieParser());
 
+
+const userRoutes = require("./routes/user.routes");
+
+app.use("/api/v1/user",userRoutes);
+
 module.exports = app;
