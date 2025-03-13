@@ -3,6 +3,7 @@ const { apiError } = require("../utils/apiError");
 const apiResponse = require("../utils/apiResponse");
 const asyncHandler = require("../utils/asyncHandler");
 const uploadOnCloudinary = require("../utils/cloudinary");
+const { generateAccessAndRefreshToken } = require("../utils/generateTokens");
 
 module.exports.registerUser = asyncHandler(async (req, res) => {
   const { userName, email, fullName, password } = req.body;
@@ -54,4 +55,44 @@ module.exports.registerUser = asyncHandler(async (req, res) => {
   return res
     .status(201)
     .json(new apiResponse(200, createdUser, "User created successfully"));
+});
+
+module.exports.loginUser = asyncHandler(async (req, res) => {
+  const { email, userName, password } = req.body;
+
+  if ((!email || !userName) && !password) {
+    new apiError(401, "Provide required fields username or email and password");
+  }
+
+  const isUser = await USER_MODEL.findOne({ $or: [{ userName }, { email }] });
+  if (!isUser) {
+    return apiError(401, "Please register first");
+  }
+
+  const verification = await isUser.verifyPassword(password);
+
+  if (!verification) {
+    return new apiError(401, "Please provide correct credentials");
+  }
+
+  const { refreshToken, AccessToken } =
+    await generateAccessAndRefreshToken(isUser);
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  const user = await USER_MODEL.findById(isUser._id);
+  res
+    .status(201)
+    .cookies("Access_token", AccessToken, options)
+    .cookies("Refresh_token", refreshToken, options)
+    .json(
+      new apiResponse(
+        201,
+        { user, AccessToken, refreshToken },
+        "User loggedIn successfully"
+      )
+    );
 });
