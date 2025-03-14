@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const brcypt = require("bcrypt");
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema(
@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      required: true,
+      // required: true,
     },
     coverImage: {
       type: String,
@@ -54,12 +54,12 @@ const userSchema = new mongoose.Schema(
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  this.password = bcrypt.hash(this.password, 5);
+  this.password = await bcrypt.hash(this.password, 5);
   next();
 });
 
 userSchema.methods.verifyPassword = async function (inputPassword) {
-  return await brcypt.compare(inputPassword, this.password);
+  return await bcrypt.compare(inputPassword, this.password);
 };
 
 userSchema.methods.generateRefreshToken = function () {
@@ -80,11 +80,11 @@ userSchema.methods.generateRefreshToken = function () {
 userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
-      _id: this._id
+      _id: this._id,
     },
-    process.env.REFRESH_TOKEN_SECRET,
+    process.env.ACCESS_TOKEN_SECRET,
     {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
     }
   );
 };

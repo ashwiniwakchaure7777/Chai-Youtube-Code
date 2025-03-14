@@ -1,12 +1,10 @@
-const asyncHandler = (fun) =>{
-    return (req,res,next)=>{
-        Promise.resolve(fun(req,res,next)).catch((error=>next(error)));
-    }
-}
-
+const asyncHandler = (requestHandler) => {
+    return (req, res, next) => {
+      Promise.resolve(requestHandler(req, res, next)).catch((err) => next(err));
+    };
+  };
+  module.exports = asyncHandler;
 // we have send the function as an argument. above code returns req,res,next which promise return. If promise resolve the next code will execute. And if the function fails to execute catch() will catch the error and send it to the express error-handling middleware   
-
-module.exports = asyncHandler;
 
 //below is higher order function
 // const asyncHandler = (fun)=>async(req,res,next)=>{

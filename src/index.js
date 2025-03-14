@@ -4,7 +4,7 @@ const dbConnection = require("./db/dbConnection");
 
 dbConnection()
   .then(() => {
-    app.listen(process.env.PORT || 8088, () => {
+    app.listen(process.env.PORT || 8090, () => {
       console.log(`Server is running on port ${process.env.PORT} 🚀`);
       app.on("error", (error) => {
         console.log("App error", error);
